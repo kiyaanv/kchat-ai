@@ -1,0 +1,31 @@
+# app.py
+from flask import Flask, request, jsonify
+import openai
+
+app = Flask(__name__)
+
+# OpenAI API key (set this securely in production)
+openai.api_key = "your-api-key"
+
+@app.route('/ask-ai', methods=['POST'])
+def ask_ai():
+    data = request.json
+    user_input = data.get('question', '')
+    if not user_input:
+        return jsonify({'error': 'No question provided'}), 400
+
+    # Generate AI response
+    try:
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=user_input,
+            max_tokens=150,
+            temperature=0.7
+        )
+        answer = response.choices[0].text.strip()
+        return jsonify({'response': answer})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
